@@ -1,4 +1,3 @@
-// components/PointDashboard.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -54,13 +53,11 @@ export const PointDashboard: React.FC = () => {
 
   return (
     <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 border-none text-white shadow-2xl shadow-indigo-500/30">
-      {/* Animated Background */}
       <div className="absolute inset-0">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-400/20 rounded-full blur-2xl animate-pulse delay-500" />
       </div>
 
-      {/* Floating Particles */}
       {[...Array(6)].map((_, i) => (
         <Sparkles
           key={i}
@@ -74,7 +71,6 @@ export const PointDashboard: React.FC = () => {
       ))}
 
       <div className="relative z-10 flex flex-col items-center py-4">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
             <Coins className="w-6 h-6" />
@@ -84,7 +80,6 @@ export const PointDashboard: React.FC = () => {
           </span>
         </div>
 
-        {/* Points Display */}
         <div className="flex items-baseline gap-3 mb-2">
           <span className="text-6xl md:text-7xl font-black tracking-tight">
             {pointsDisplay.toLocaleString()}
@@ -92,7 +87,6 @@ export const PointDashboard: React.FC = () => {
           <span className="text-xl text-indigo-100 font-medium">Pts</span>
         </div>
 
-        {/* Points Change Indicator */}
         {gainedPoints > 0 && (
           <div className="flex items-center gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-4 animate-[fadeInUp_0.3s_ease-out]">
             <TrendingUp className="w-4 h-4" />
@@ -100,13 +94,11 @@ export const PointDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Exchange Rate */}
         <div className="flex items-center gap-2 px-5 py-2.5 bg-white/15 backdrop-blur-md rounded-2xl text-sm font-medium">
           <Gift className="w-4 h-4" />
           <span>100 บาท = 10 แต้ม • ใช้แทนเงินสดได้</span>
         </div>
 
-        {/* Progress to Next Reward */}
         <div className="w-full max-w-xs mt-6">
           <div className="flex justify-between text-xs text-indigo-100 mb-2">
             <span>ระดับถัดไป</span>
