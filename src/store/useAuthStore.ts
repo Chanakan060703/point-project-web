@@ -2,9 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface User {
-  userId: string;
+  userId: number;
   username: string;
   role: string;
+  name?: string;
 }
 
 interface AuthState {
