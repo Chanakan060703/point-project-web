@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const loginSchema = z.object({
     username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -22,6 +23,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState('');
     const router = useRouter();
+    const { setUser, setToken } = useAuthStore();
 
     const {
         control,
@@ -39,8 +41,10 @@ export default function LoginPage() {
         setApiError('');
 
         try {
-            await login(data.username, data.password);
-            router.push('/Bill');
+            const response = await login(data.username, data.password);
+            setUser(response.user);
+            setToken(response.token);
+            router.push('/bill');
             router.refresh();
         } catch (err: any) {
             setApiError(err.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -101,7 +105,7 @@ export default function LoginPage() {
                 </Card>
 
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                    Don&apos;t have an account?{' '}
+                    {`Don't have an account?`}
                     <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
                         Create an account
                     </Link>

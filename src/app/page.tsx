@@ -1,29 +1,22 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { getSession, logout } from "@/lib/auth";
+import { useAuthStore } from "@/store/useAuthStore";
+import { logout as apiLogout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, logout: storeLogout } = useAuthStore();
   const router = useRouter();
 
-  useEffect(() => {
-    const token = getSession();
-    if (!token) {
-      setIsAuthenticated(false);
-    } else {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
   const handleLogout = () => {
-    logout();
-    setIsAuthenticated(false);
+    apiLogout();
+    storeLogout();
     router.refresh();
   };
+
+  const isAuthenticated = !!user;
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-black items-center justify-center p-6">

@@ -11,7 +11,9 @@ export interface AuthResponse {
 }
 
 export const login = async (username: string, password: string): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', { username, password });
+  const response = await api.post<AuthResponse>('/auth/login', {
+    username, password
+  });
   const { token } = response.data;
 
   Cookies.set('token', token, { expires: 7, secure: process.env.NODE_ENV === 'production' });

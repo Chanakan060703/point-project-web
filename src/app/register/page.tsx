@@ -14,6 +14,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -34,6 +35,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { setUser, setToken } = useAuthStore();
 
     const {
         control,
@@ -54,13 +56,15 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            await registerApi(
+            const response = await registerApi(
                 data.name,
                 data.username,
                 data.password,
                 Number(data.age),
                 data.gender
             );
+            setUser(response.user);
+            setToken(response.token);
             toast.success('Account created successfully!');
             router.push('/');
             router.refresh();
