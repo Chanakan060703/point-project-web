@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
     apiLogout();
     storeLogout();
     resetPoints();
-    router.push('/login');
+    router.push('/auth/login');
     router.refresh();
   };
 

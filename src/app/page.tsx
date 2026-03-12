@@ -15,11 +15,10 @@ export default function Home() {
   const handleLogout = () => {
     apiLogout();
     storeLogout();
-    router.refresh();
+    router.replace('/');
   };
 
-  const isAuthenticated = !!user;
-
+  const isAuthenticated = Boolean(user);
   return (
     <main className="home-page">
       <div className="home-container">
@@ -61,7 +60,7 @@ export default function Home() {
               ) : (
                 <>
                   <Button
-                    onClick={() => router.push('/login')}
+                    onClick={() => router.push('/auth/login')}
                     size="lg"
                     fullWidth
                   >
@@ -69,7 +68,7 @@ export default function Home() {
                   </Button>
 
                   <Button
-                    onClick={() => router.push('/register')}
+                    onClick={() => router.push('/auth/register')}
                     variant="secondary"
                     size="lg"
                     fullWidth

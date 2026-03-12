@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children, role }: { children: React.Rea
 
     useEffect(() => {
         if (hasHydrated && !user) {
-            router.push('/login');
+            router.push('/auth/login');
         }
 
         if (hasHydrated && user && role && user.role !== role) {

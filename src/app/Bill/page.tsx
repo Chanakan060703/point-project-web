@@ -119,9 +119,7 @@ export default function BillPage() {
                     </div>
 
                     <Card className="bill-card">
-
                         <div className="bill-card-inner">
-
                             <div className="bill-section-header">
                                 <h3>ข้อมูลรายการ</h3>
                                 <p>กรุณากรอกรายละเอียดเพื่อคำนวณแต้ม</p>
@@ -148,7 +146,15 @@ export default function BillPage() {
                                         label="ราคาตามบิล (บาท)"
                                         type="number"
                                         placeholder="0.00"
-                                        {...register('price', { valueAsNumber: true })}
+                                        {...register('price', {
+                                            valueAsNumber: true,
+                                            onChange: (e) => {
+                                                if (e.target.value.length > 8) {
+                                                    e.target.value = e.target.value.slice(0, 8);
+                                                    setValue('price', Number(e.target.value));
+                                                }
+                                            }
+                                        })}
                                         error={errors.price?.message}
                                     />
 

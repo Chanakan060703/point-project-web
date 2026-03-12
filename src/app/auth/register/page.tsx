@@ -14,7 +14,7 @@ import { AxiosError } from 'axios';
 import * as z from 'zod';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
-import '../globals.css';
+import '../../globals.css';
 
 const registerSchema = z.object({
     name: z.string().min(2, 'กรุณากรอกชื่อ-นามสกุล'),

@@ -687,10 +687,11 @@ body {
 
 /*Point Dashboarh*/
 .points-card {
-  background: #ffffff;
-  color: #ffffff;
+  background: #2563eb;
   border: none;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  color: white;
+  text-align: center;
+  border-radius: 1rem;
 }
 
 .points-container {
@@ -723,6 +724,7 @@ body {
 .points-number {
   font-size: 48px;
   font-weight: 700;
+  color: #ffffff;
 }
 
 .points-units {
@@ -736,11 +738,10 @@ body {
 /* info */
 
 .points-info {
-  background: #0055FF;
-
+  background: #fff;
+  color: #000;
   padding: 8px 16px;
   border-radius: 12px;
-
   font-size: 14px;
   font-weight: 500;
 }
@@ -752,14 +753,6 @@ body {
   max-width: 280px;
 
   margin-top: 32px;
-}
-
-.progress-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-
-  overflow: hidden;
 }
 
 .progress-fill {

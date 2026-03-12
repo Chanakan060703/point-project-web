@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/Card';
 import { Button } from '@/components/Button';
 import { login, getProfile } from '@/lib/auth';
@@ -12,7 +12,7 @@ import { AxiosError } from 'axios';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput';
 import { useAuthStore } from '@/store/useAuthStore';
-import '../globals.css';
+import '../../globals.css';
 
 const loginSchema = z.object({
     username: z.string().min(3, 'กรุณากรอก ชื่อผู้ใช้'),
@@ -25,8 +25,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [apiError, setApiError] = useState('');
     const router = useRouter();
-    const { setUser, setToken } = useAuthStore();
-
+    const { setUser, setToken, user } = useAuthStore();
     const { control, handleSubmit } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -53,8 +52,7 @@ export default function LoginPage() {
                     role: profile.role
                 });
 
-                router.push('/');
-                router.refresh();
+                router.replace('/');
             } else {
                 setApiError('Authentication failed: No token received.');
             }
@@ -69,6 +67,12 @@ export default function LoginPage() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (user) {
+            router.replace('/');
+        }
+    })
 
     return (
         <main className="login-page">

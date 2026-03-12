@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
     const isProtectedRoute = pathname.startsWith('/bill') || pathname.startsWith('/transaction');
 
     if (isProtectedRoute && !token) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
     if (token && pathname === '/login') {
@@ -19,5 +19,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/bill/:path*', '/transaction/:path*', '/login'],
+    matcher: ['/bill/:path*', '/transaction/:path*', '/auth/login'],
 };

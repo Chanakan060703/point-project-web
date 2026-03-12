@@ -10,12 +10,12 @@ interface FormInputProps<T extends FieldValues> {
   placeholder?: string;
 }
 
-export function FormInput<T extends FieldValues>({ 
-  name, 
-  control, 
-  label, 
-  type = 'text', 
-  placeholder 
+export function FormInput<T extends FieldValues>({
+  name,
+  control,
+  label,
+  type = 'text',
+  placeholder
 }: FormInputProps<T>) {
   const {
     field,

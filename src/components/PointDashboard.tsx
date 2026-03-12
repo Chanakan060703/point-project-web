@@ -41,7 +41,7 @@ export const PointDashboard: React.FC = () => {
   }
 
   const pointsDisplay = points ?? 0;
-  const progress = pointsDisplay % 100;
+
 
   return (
     <Card className="points-card">
@@ -60,21 +60,9 @@ export const PointDashboard: React.FC = () => {
             แต้ม
           </span>
         </div>
-
         <div className="points-info">
           100 บาท = 10 แต้ม • ใช้แทนเงินสดได้
         </div>
-
-        <div className="points-progress">
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-
-        </div>
-
       </div>
 
     </Card>
