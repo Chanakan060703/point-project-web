@@ -29,12 +29,14 @@ export default function Home() {
             <div className="home-actions">
               {isAuthenticated ? (
                 <>
-                  <button
-                    onClick={() => router.push('/bill')}
-                    className="btn btn-primary btn-lg btn-full"
-                  >
-                    ออกบิล / รับแต้ม
-                  </button>
+                  {user?.role === 'ADMIN' && (
+                    <button
+                      onClick={() => router.push('/bill')}
+                      className="btn btn-primary btn-lg btn-full"
+                    >
+                      ออกบิล
+                    </button>
+                  )}
 
                   <button
                     onClick={() => router.push('/transaction')}

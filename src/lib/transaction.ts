@@ -16,6 +16,11 @@ export interface Transaction {
     name: string;
     amount: string;
   };
+  user?: {
+    id: number;
+    username: string;
+    name?: string;
+  };
 }
 
 export interface CreateTransactionRequest {

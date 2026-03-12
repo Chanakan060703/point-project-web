@@ -6,7 +6,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card } from "@/components/Card";
 import { getTransactions, Transaction } from '@/lib/transaction';
 import { useAuthStore } from '@/store/useAuthStore';
-import { History } from 'lucide-react';
+import { History, User } from 'lucide-react';
 import '../globals.css';
 
 export default function TransactionPage() {
@@ -14,23 +14,28 @@ export default function TransactionPage() {
     const router = useRouter();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const isAdmin = user?.role === 'ADMIN';
+
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
                 const data = await getTransactions();
-                setTransactions(
-                    data.filter(tx => tx.userId === Number(user?.userId))
-                );
+                if (isAdmin) {
+                    setTransactions(data);
+                } else {
+                    setTransactions(
+                        data.filter(tx => tx.userId === Number(user?.userId))
+                    );
+                }
             } catch (err) {
                 console.error("Failed to fetch transactions:", err);
             } finally {
                 setLoading(false);
             }
         };
-        if (user?.userId) {
-            fetchTransactions();
-        }
-    }, [user]);
+        fetchTransactions();
+    }, [user, isAdmin]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("th-TH", {
@@ -48,7 +53,11 @@ export default function TransactionPage() {
                 <div className="transaction-container">
                     <div className="transaction-header">
                         <h2>ประวัติการใช้งาน</h2>
-                        <p>รวมรายการสะสมและใช้แต้มทั้งหมดของคุณ</p>
+                        <p>
+                            {isAdmin
+                                ? 'รายการทั้งหมดในระบบ'
+                                : 'รวมรายการสะสมและใช้แต้มทั้งหมดของคุณ'}
+                        </p>
                     </div>
                     {loading ? (
                         <div className="transaction-loading">
@@ -62,12 +71,22 @@ export default function TransactionPage() {
                                 <History size={32} />
                             </div>
                             <p>ยังไม่มีรายการในขณะนี้</p>
-                            <button
-                                onClick={() => router.push("/bill")}
-                                className="btn btn-primary btn-lg"
-                            >
-                                ออกบิลใบแรกเลย
-                            </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => router.push("/bill")}
+                                    className="btn btn-primary btn-lg"
+                                >
+                                    สร้างบิลให้ลูกค้า
+                                </button>
+                            )}
+                            {!isAdmin && (
+                                <button
+                                    onClick={() => router.push("/bill")}
+                                    className="btn btn-primary btn-lg"
+                                >
+                                    ออกบิลใบแรกเลย
+                                </button>
+                            )}
                         </Card>
                     ) : (
 
@@ -96,6 +115,12 @@ export default function TransactionPage() {
                                             {tx.bill && (
                                                 <p>
                                                     ยอดชำระ: {Number(tx.bill.amount).toLocaleString()} ฿
+                                                </p>
+                                            )}
+                                            {isAdmin && tx.user && (
+                                                <p className="transaction-user">
+                                                    <User size={14} />
+                                                    {tx.user.username}
                                                 </p>
                                             )}
                                         </div>

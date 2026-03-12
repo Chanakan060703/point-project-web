@@ -40,7 +40,7 @@ export const Header: React.FC = () => {
 
   const navLinks = [
     { name: 'หน้าแรก', href: '/' },
-    { name: 'ออกบิล', href: '/bill' },
+    ...(user?.role === 'ADMIN' ? [{ name: 'ออกบิล', href: '/bill' }] : []),
     { name: 'ประวัติ', href: '/transaction' },
   ];
 

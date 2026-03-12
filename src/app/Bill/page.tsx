@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import * as z from 'zod';
 import { useRouter } from 'next/navigation';
+import { User, CheckCircle } from 'lucide-react';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { createBill } from '@/lib/bill';
-import { getCurrentPoints } from '@/lib/auth';
+import { getCurrentPoints, getAllUsers, UserInfo } from '@/lib/auth';
 import { useAuthStore } from '@/store/useAuthStore';
 import '../globals.css';
 
@@ -23,19 +24,24 @@ const billSchema = z.object({
 type BillFormValues = z.infer<typeof billSchema>;
 
 export default function BillPage() {
-
-    const { user } = useAuthStore();
+    const { user: currentUser } = useAuthStore();
     const router = useRouter();
 
-    const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState<UserInfo[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(true);
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
     const [userPoints, setUserPoints] = useState(0);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [usersError, setUsersError] = useState<string | null>(null);
 
     const {
         register,
         handleSubmit,
         watch,
         setValue,
+        reset,
         formState: { errors }
     } = useForm<BillFormValues>({
         resolver: zodResolver(billSchema),
@@ -48,31 +54,51 @@ export default function BillPage() {
 
     const price = watch("price");
     const redeemPoint = watch("redeemPoint");
-    const nameField = register('name');
-    const priceField = register('price', {
-        valueAsNumber: true,
-        onChange: (e) => {
-            if (e.target.value.length > 8) {
-                e.target.value = e.target.value.slice(0, 8);
-                setValue('price', Number(e.target.value));
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await getAllUsers();
+                const nonAdmins = data.filter(u => u.role !== 'ADMIN');
+                setUsers(nonAdmins);
+            } catch (err) {
+                console.error("Failed to fetch users:", err);
+                setUsersError('ไม่สามารถโหลดรายชื่อลูกค้าได้');
+            } finally {
+                setLoadingUsers(false);
             }
-        }
-    });
-    const redeemPointField = register('redeemPoint', { valueAsNumber: true });
+        };
+        fetchUsers();
+    }, []);
 
     useEffect(() => {
         const fetchPoints = async () => {
-            if (!user?.userId) return;
+            if (!selectedUserId) {
+                setUserPoints(0);
+                return;
+            }
             try {
-                const points = await getCurrentPoints(user.userId);
+                const points = await getCurrentPoints(selectedUserId);
                 setUserPoints(points);
             } catch (err) {
-                console.error("Failed to fetch user points", err);
+                console.error("Failed to fetch points:", err);
+                setUserPoints(0);
             }
         };
-
         fetchPoints();
-    }, [user]);
+    }, [selectedUserId]);
+
+    const filteredUsers = useMemo(() => {
+        if (!searchQuery.trim()) return [];
+
+        const query = searchQuery.toLowerCase();
+        return users.filter(u =>
+            u.username.toLowerCase().includes(query) ||
+            (u.name && u.name.toLowerCase().includes(query))
+        );
+    }, [users, searchQuery]);
+
+    const selectedUser = users.find(u => u.id === selectedUserId);
 
     const safePrice = Number(watch("price")) || 0;
     const safeRedeemPoint = Number(watch("redeemPoint")) || 0;
@@ -81,23 +107,23 @@ export default function BillPage() {
     const finalAmount = Math.max(0, price - redeemPoint) || 0;
 
     const onSubmit = async (data: BillFormValues) => {
-        if (!user?.userId) {
-            setError("ไม่พบข้อมูลผู้ใช้");
+        if (!selectedUserId) {
+            setError("กรุณาเลือกลูกค้า");
             return;
         }
         setLoading(true);
         setError(null);
         try {
             await createBill({
-                userId: user.userId,
+                userId: selectedUserId,
                 name: data.name,
                 price: data.price,
                 redeemPoint: data.redeemPoint
             });
-            router.push("/");
-            router.refresh();
+            reset();
+            setSelectedUserId(null);
+            alert('สร้างบิลสำเร็จ!');
         } catch (err) {
-
             const message =
                 err instanceof AxiosError
                     ? (err.response?.data as { message?: string })?.message || err.message
@@ -109,130 +135,204 @@ export default function BillPage() {
         }
     };
 
+    if (currentUser?.role !== 'ADMIN') {
+        return (
+            <ProtectedRoute>
+                <main className="bill-page">
+                    <div className="bill-container">
+                        <Card className="bill-card">
+                            <div className="bill-card-inner" style={{ textAlign: 'center', padding: '3rem' }}>
+                                <h2>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</h2>
+                                <p style={{ marginTop: '1rem', color: '#666' }}>
+                                    หน้าสร้างบิลสำหรับ ADMIN เท่านั้น
+                                </p>
+                                <button
+                                    onClick={() => router.push("/")}
+                                    className="btn btn-primary btn-lg"
+                                    style={{ marginTop: '1.5rem' }}
+                                >
+                                    กลับหน้าหลัก
+                                </button>
+                            </div>
+                        </Card>
+                    </div>
+                </main>
+            </ProtectedRoute>
+        );
+    }
+
     return (
         <ProtectedRoute>
             <main className="bill-page">
                 <div className="bill-container">
                     <div className="bill-header">
-                        <h2>สร้างบิล</h2>
-                        <p>ทำรายการเพื่อเพิ่มแต้มสะสมของคุณ</p>
+                        <h2>สร้างบิลให้ลูกค้า</h2>
+                        <p>เลือกลูกค้าจากรายชื่อ</p>
                     </div>
+
                     <Card className="bill-card">
                         <div className="bill-card-inner">
                             <div className="bill-section-header">
-                                <h3>ข้อมูลรายการ</h3>
-                                <p>กรุณากรอกรายละเอียดเพื่อคำนวณแต้ม</p>
+                                <h3>เลือกลูกค้า</h3>
                             </div>
-                            <form onSubmit={handleSubmit(onSubmit)} className="bill-form">
-                                {error && (
-                                    <div className="bill-error">
-                                        {error}
-                                    </div>
-                                )}
-                                <div className="bill-grid">
-                                    <Input
-                                        label="ชื่อรายการ / อาหาร"
-                                        placeholder="เช่น หม่าล่าเผ็ดชา"
-                                        {...nameField}
-                                        inputRef={nameField.ref}
-                                        error={errors.name?.message}
-                                    />
-                                    <Input
-                                        label="ราคาตามบิล (บาท)"
-                                        type="number"
-                                        placeholder="0.00"
-                                        {...priceField}
-                                        inputRef={priceField.ref}
-                                        error={errors.price?.message}
-                                        max={isNaN(maxRedeemable) ? 0 : maxRedeemable}
-                                    />
-                                </div>
-                                <div className="points-preview">
-                                    <div className="points-preview-label">
-                                        แต้มที่จะได้รับ (10%)
-                                    </div>
-                                    <div className="points-preview-value">
-                                        {pointsToEarn.toLocaleString()} แต้ม
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="redeem-header">
-                                        <label>
-                                            ใช้แต้มส่วนลด (สูงสุด: {maxRedeemable})
-                                        </label>
-                                        <span>
-                                            มีอยู่: {userPoints.toLocaleString()} Pts
-                                        </span>
-                                    </div>
-                                    <div className="redeem-input">
-                                        <Input
-                                            label=""
-                                            type="number"
-                                            {...redeemPointField}
-                                            inputRef={redeemPointField.ref}
-                                            error={errors.redeemPoint?.message}
-                                            max={maxRedeemable}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setValue('redeemPoint', isNaN(maxRedeemable) ? 0 : maxRedeemable)}
-                                            className="btn btn-secondary btn-md"
-                                        >
-                                            ใช้ทั้งหมด
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="bill-summary">
-                                    <div className="summary-row">
-                                        <span>ราคาปกติ</span>
-                                        <span>{safePrice.toLocaleString()} ฿</span>
-                                    </div>
-                                    <div className="summary-row discount">
-                                        <span>ส่วนลดจากแต้ม</span>
-                                        <span>-{safeRedeemPoint.toLocaleString()} ฿</span>
-                                    </div>
-                                    <div className="summary-total">
-                                        <span>ยอดชำระสุทธิ</span>
-                                        <span>{finalAmount.toLocaleString()} ฿</span>
-                                    </div>
-                                </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="btn btn-primary btn-lg btn-full"
-                                >
-                                    {loading ? (
-                                        <div className="btn-loading">
-                                            <svg className="btn-spinner" viewBox="0 0 24 24">
-                                                <circle
-                                                    className="spinner-bg"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    strokeWidth="3"
-                                                    fill="none"
-                                                />
-                                                <path className="spinner-fg" d="M4 12a8 8 0 018-8" />
-                                            </svg>
-                                            <span>...</span>
+                            <div className="user-search-wrapper">
+                                <Input
+                                    label="ค้นหาลูกค้า (username หรือ ชื่อ)"
+                                    placeholder="พิมพ์เพื่อค้นหา..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+
+                            {loadingUsers ? (
+                                <p>กำลังโหลด...</p>
+                            ) : usersError ? (
+                                <div className="bill-error">{usersError}</div>
+                            ) : (
+                                <div className="user-list">
+                                    {filteredUsers.map(user => (
+                                        <div
+                                            key={user.id}
+                                            className={`user-item ${selectedUserId === user.id ? 'selected' : ''}`}
+                                            onClick={() => setSelectedUserId(user.id)}
+                                        >
+                                            <div className="user-item-info">
+                                                <span className="username">{user.username}</span>
+                                                {user.name && <span className="name">({user.name})</span>}
+                                            </div>
+                                            <span className="points">{user.pointTotal} Pts</span>
+                                            {selectedUserId === user.id}
                                         </div>
-                                    ) : (
-                                        <span>ยืนยันและชำระเงิน</span>
+                                    ))}
+                                    {filteredUsers.length === 0 && (
+                                        <p style={{ textAlign: 'center', color: '#666' }}>
+                                            {searchQuery ? 'ไม่พบลูกค้าที่ค้นหา' : 'กรุณากรอกชื่อลูกค้า'}
+                                        </p>
                                     )}
-                                </button>
-                            </form>
+                                </div>
+                            )}
                         </div>
                     </Card>
 
-                    <div className="bill-cancel">
-                        <button
-                            onClick={() => router.push("/")}
-                            className="btn btn-ghost btn-sm"
-                        >
-                            ยกเลิกและกลับหน้าหลัก
-                        </button>
-                    </div>
+                    {selectedUser && (
+                        <>
+                            <Card className="bill-card">
+                                <div className="bill-card-inner">
+                                    <div className="bill-section-header">
+                                        <h3>ข้อมูลรายการ</h3>
+                                        <p>กรุณากรอกรายละเอียดเพื่อคำนวณแต้ม</p>
+                                    </div>
+                                    <form onSubmit={handleSubmit(onSubmit)} className="bill-form">
+                                        {error && (
+                                            <div className="bill-error">
+                                                {error}
+                                            </div>
+                                        )}
+                                        <div className="bill-grid">
+                                            <Input
+                                                label="ชื่อรายการ / อาหาร"
+                                                placeholder="เช่น หม่าล่าเผ็ดชา"
+                                                {...register('name')}
+                                                inputRef={register('name').ref}
+                                                error={errors.name?.message}
+                                            />
+                                            <Input
+                                                label="ราคาตามบิล (บาท)"
+                                                type="number"
+                                                placeholder="0.00"
+                                                {...register('price', {
+                                                    valueAsNumber: true,
+                                                    onChange: (e) => {
+                                                        if (e.target.value.length > 8) {
+                                                            e.target.value = e.target.value.slice(0, 8);
+                                                            setValue('price', Number(e.target.value));
+                                                        }
+                                                    }
+                                                })}
+                                                inputRef={register('price').ref}
+                                                error={errors.price?.message}
+                                            />
+                                        </div>
+                                        <div className="points-preview">
+                                            <div className="points-preview-label">
+                                                แต้มที่จะได้รับ (10%)
+                                            </div>
+                                            <div className="points-preview-value">
+                                                {pointsToEarn.toLocaleString()} แต้ม
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="redeem-header">
+                                                <label>
+                                                    ใช้แต้มส่วนลด (สูงสุด: {maxRedeemable})
+                                                </label>
+                                                <span>
+                                                    มีอยู่: {userPoints.toLocaleString()} Pts
+                                                </span>
+                                            </div>
+                                            <div className="redeem-input">
+                                                <Input
+                                                    label=""
+                                                    type="number"
+                                                    {...register('redeemPoint', { valueAsNumber: true })}
+                                                    inputRef={register('redeemPoint').ref}
+                                                    error={errors.redeemPoint?.message}
+                                                    max={maxRedeemable}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setValue('redeemPoint', isNaN(maxRedeemable) ? 0 : maxRedeemable)}
+                                                    className="btn btn-secondary btn-md"
+                                                >
+                                                    ใช้ทั้งหมด
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="bill-summary">
+                                            <div className="summary-row">
+                                                <span>ราคาปกติ</span>
+                                                <span>{safePrice.toLocaleString()} ฿</span>
+                                            </div>
+                                            <div className="summary-row discount">
+                                                <span>ส่วนลดจากแต้ม</span>
+                                                <span>-{safeRedeemPoint.toLocaleString()} ฿</span>
+                                            </div>
+                                            <div className="summary-total">
+                                                <span>ยอดชำระสุทธิ</span>
+                                                <span>{finalAmount.toLocaleString()} ฿</span>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="btn btn-primary btn-lg btn-full"
+                                        >
+                                            {loading ? (
+                                                <div className="btn-loading">
+                                                    <svg className="btn-spinner" viewBox="0 0 24 24">
+                                                        <circle
+                                                            className="spinner-bg"
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                            strokeWidth="3"
+                                                            fill="none"
+                                                        />
+                                                        <path className="spinner-fg" d="M4 12a8 8 0 018-8" />
+                                                    </svg>
+                                                    <span>...</span>
+                                                </div>
+                                            ) : (
+                                                <span>ยืนยันและชำระเงิน</span>
+                                            )}
+                                        </button>
+                                    </form>
+                                </div>
+                            </Card>
+                        </>
+                    )}
                 </div>
             </main>
         </ProtectedRoute>

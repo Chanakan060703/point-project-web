@@ -20,6 +20,19 @@ export interface UserProfile {
   role: string;
 }
 
+export interface UserInfo {
+  id: number;
+  username: string;
+  name?: string;
+  role: string;
+  pointTotal: number;
+}
+
+export const getAllUsers = async (): Promise<UserInfo[]> => {
+  const response = await api.get<UserInfo[]>('/user');
+  return response.data;
+};
+
 export const login = async (
   username: string,
   password: string
