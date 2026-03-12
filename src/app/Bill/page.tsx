@@ -114,7 +114,7 @@ export default function BillPage() {
             <main className="bill-page">
                 <div className="bill-container">
                     <div className="bill-header">
-                        <h2>สร้างบิล / สะสมแต้ม</h2>
+                        <h2>สร้างบิล</h2>
                         <p>ทำรายการเพื่อเพิ่มแต้มสะสมของคุณ</p>
                     </div>
                     <Card className="bill-card">
@@ -213,11 +213,8 @@ export default function BillPage() {
                                                     strokeWidth="3"
                                                     fill="none"
                                                 />
-                                                <path className="spinner-fg"
-                                                    d="M4 12a8 8 0 018-8"
-                                                />
+                                                <path className="spinner-fg" d="M4 12a8 8 0 018-8" />
                                             </svg>
-
                                             <span>...</span>
                                         </div>
                                     ) : (

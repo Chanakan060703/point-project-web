@@ -162,21 +162,9 @@ export default function RegisterPage() {
                             {isLoading ? (
                                 <div className="btn-loading">
                                     <svg className="btn-spinner" viewBox="0 0 24 24">
-                                        <circle
-                                            className="spinner-bg"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            strokeWidth="3"
-                                            fill="none"
-                                        />
-
-                                        <path
-                                            className="spinner-fg"
-                                            d="M4 12a8 8 0 018-8"
-                                        />
+                                        <circle className="spinner-bg" cx="12" cy="12" r="10" strokeWidth="3" fill="none" />
+                                        <path className="spinner-fg" d="M4 12a8 8 0 018-8" />
                                     </svg>
-
                                     <span>...</span>
                                 </div>
                             ) : (
