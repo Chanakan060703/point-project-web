@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
 import { register as registerApi, getProfile } from '@/lib/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -29,8 +28,8 @@ const registerSchema = z.object({
         }),
     gender: z.string().min(1, 'กรุณาเลือกเพศ'),
 }).refine((data) => data.password === data.confirmPassword, {
-    message: "รหัสผ่านไม่ถูกต้อง",
-    path: ['ยืนยันรหัสผ่าน'],
+    message: 'รหัสผ่านไม่ถูกต้อง',
+    path: ['confirmPassword'],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -77,18 +76,17 @@ export default function RegisterPage() {
                     role: profile.role,
                 });
 
-                toast.success('Account created successfully!');
+                toast.success('สร้างบัญชีสำเร็จ');
                 router.push('/');
                 router.refresh();
             } else {
-                toast.error('Registration successful, but login failed: No token received.');
+                toast.error('สมัครสมาชิกสำเร็จ แต่เข้าสู่ระบบอัตโนมัติไม่สำเร็จ');
             }
         } catch (error) {
             const errorMessage =
                 error instanceof AxiosError
                     ? (error.response?.data as { message?: string } | undefined)?.message || error.message
-                    : 'Registration failed. Please try again.';
-
+                    : 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
@@ -103,7 +101,6 @@ export default function RegisterPage() {
                     <h1>สร้างบัญชีผู้ใช้</h1>
                     <p>เข้าร่วมเพื่อสะสมแต้ม</p>
                 </div>
-
                 <Card>
                     <form onSubmit={handleSubmit(onSubmit)} className="register-form">
 
@@ -133,7 +130,7 @@ export default function RegisterPage() {
                             <FormInput
                                 name="confirmPassword"
                                 control={control}
-                                label="ยืนยัน รหัสผ่าน"
+                                label="ยืนยันรหัสผ่าน"
                                 type="password"
                                 placeholder="••••••••"
                             />
@@ -159,26 +156,38 @@ export default function RegisterPage() {
                                 ]}
                             />
                         </div>
-
-                        <div className="register-terms">
-                            การสร้างบัญชีหากมีปัญหาโปรด{' '}
-                            <a href="#">ติดต่อเรา</a>
+                        <div className="register-terms"> การสร้างบัญชีหากมีปัญหาโปรด{' '} <a href="#">ติดต่อเรา</a>
                         </div>
+                        <button type="submit" className="btn btn-primary btn-lg register-button" disabled={isLoading}>
+                            {isLoading ? (
+                                <div className="btn-loading">
+                                    <svg className="btn-spinner" viewBox="0 0 24 24">
+                                        <circle
+                                            className="spinner-bg"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            strokeWidth="3"
+                                            fill="none"
+                                        />
 
-                        <Button
-                            type="submit"
-                            className="register-button"
-                            isLoading={isLoading}
-                            size="lg"
-                        >
-                            สร้างบัญชี
-                        </Button>
+                                        <path
+                                            className="spinner-fg"
+                                            d="M4 12a8 8 0 018-8"
+                                        />
+                                    </svg>
 
+                                    <span>...</span>
+                                </div>
+                            ) : (
+                                <span>สร้างบัญชี</span>
+                            )}
+                        </button>
                     </form>
                 </Card>
 
                 <p className="register-login">
-                    หากมีบัญชีผู้ใช้สามารถ?{' '}
+                    มีบัญชีผู้ใช้อยู่แล้ว?{' '}
                     <Link href="/login">เข้าสู่ระบบ</Link>
                 </p>
 

@@ -4,14 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card } from "@/components/Card";
-import { Button } from "@/components/Button";
 import { getTransactions, Transaction } from '@/lib/transaction';
 import { useAuthStore } from '@/store/useAuthStore';
 import { History } from 'lucide-react';
 import '../globals.css';
 
 export default function TransactionPage() {
-
     const { user } = useAuthStore();
     const router = useRouter();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -29,11 +27,9 @@ export default function TransactionPage() {
                 setLoading(false);
             }
         };
-
         if (user?.userId) {
             fetchTransactions();
         }
-
     }, [user]);
 
     const formatDate = (dateString: string) => {
@@ -66,12 +62,12 @@ export default function TransactionPage() {
                                 <History size={32} />
                             </div>
                             <p>ยังไม่มีรายการในขณะนี้</p>
-                            <Button
+                            <button
                                 onClick={() => router.push("/bill")}
-                                size="lg"
+                                className="btn btn-primary btn-lg"
                             >
                                 ออกบิลใบแรกเลย
-                            </Button>
+                            </button>
                         </Card>
                     ) : (
 
@@ -104,11 +100,7 @@ export default function TransactionPage() {
                                             )}
                                         </div>
                                         <div
-                                            className={
-                                                tx.type === "EARN"
-                                                    ? "transaction-point earn"
-                                                    : "transaction-point spend"
-                                            }
+                                            className={tx.type === "EARN" ? "transaction-point earn" : "transaction-point spend"}
                                         >
                                             {tx.point.toLocaleString()} แต้ม
                                         </div>
@@ -118,13 +110,12 @@ export default function TransactionPage() {
                         </div>
                     )}
                     <div className="transaction-back">
-                        <Button
-                            variant="ghost"
-                            size="sm"
+                        <button
                             onClick={() => router.push("/")}
+                            className="btn btn-ghost btn-sm"
                         >
                             กลับหน้าหลัก
-                        </Button>
+                        </button>
                     </div>
                 </div>
             </main>

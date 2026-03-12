@@ -16,7 +16,7 @@ export function FormSelect<T extends FieldValues>({
   options
 }: FormSelectProps<T>) {
   const {
-    field,
+    field: { ref, ...field },
     fieldState: { error },
   } = useController({
     name,
@@ -26,6 +26,7 @@ export function FormSelect<T extends FieldValues>({
   return (
     <Select
       {...field}
+      selectRef={ref}
       label={label}
       options={options}
       error={error?.message}

@@ -42,16 +42,12 @@ export const PointDashboard: React.FC = () => {
 
   const pointsDisplay = points ?? 0;
 
-
   return (
     <Card className="points-card">
-
       <div className="points-container">
-
         <span className="points-labels">
           คะแนนสะสมของคุณ
         </span>
-
         <div className="points-value">
           <span className="points-number">
             {pointsDisplay.toLocaleString()}

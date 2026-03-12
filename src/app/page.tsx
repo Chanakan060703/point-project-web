@@ -3,7 +3,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import { logout as apiLogout } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { PointDashboard } from "@/components/PointDashboard";
 import "./globals.css";
@@ -25,56 +24,47 @@ export default function Home() {
         <Card className="home-card">
           <div className="home-content">
             <h1 className="home-title">
-              หม่าล่าเชิงดอย
+              หม่าล่าเชียงดอย
             </h1>
-
             <div className="home-actions">
               {isAuthenticated ? (
                 <>
-                  <Button
+                  <button
                     onClick={() => router.push('/bill')}
-                    size="lg"
-                    fullWidth
+                    className="btn btn-primary btn-lg btn-full"
                   >
                     ออกบิล / รับแต้ม
-                  </Button>
+                  </button>
 
-                  <Button
-                    variant="secondary"
+                  <button
                     onClick={() => router.push('/transaction')}
-                    size="lg"
-                    fullWidth
+                    className="btn btn-secondary btn-lg btn-full"
                   >
                     ดูประวัติการใช้งาน
-                  </Button>
+                  </button>
 
-                  <Button
-                    variant="ghost"
+                  <button
                     onClick={() => handleLogout()}
-                    size="sm"
-                    className="logout-btn"
+                    className="btn btn-ghost btn-sm logout-btn"
                   >
                     ออกจากระบบ
-                  </Button>
+                  </button>
                 </>
               ) : (
                 <>
-                  <Button
+                  <button
                     onClick={() => router.push('/auth/login')}
-                    size="lg"
-                    fullWidth
+                    className="btn btn-primary btn-lg btn-full"
                   >
                     เข้าสู่ระบบ
-                  </Button>
+                  </button>
 
-                  <Button
+                  <button
                     onClick={() => router.push('/auth/register')}
-                    variant="secondary"
-                    size="lg"
-                    fullWidth
+                    className="btn btn-secondary btn-lg btn-full"
                   >
-                    สมัคร สมาชิกใหม่
-                  </Button>
+                    สมัครสมาชิกใหม่
+                  </button>
                 </>
               )}
             </div>

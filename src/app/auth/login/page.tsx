@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
 import { login, getProfile } from '@/lib/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,8 +14,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import '../../globals.css';
 
 const loginSchema = z.object({
-    username: z.string().min(3, 'กรุณากรอก ชื่อผู้ใช้'),
-    password: z.string().min(6, 'กรุณากรอก รหัสผ่าน'),
+    username: z.string().min(3, 'กรุณากรอกชื่อผู้ใช้'),
+    password: z.string().min(6, 'กรุณากรอกรหัสผ่าน'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -54,13 +53,13 @@ export default function LoginPage() {
 
                 router.replace('/');
             } else {
-                setApiError('Authentication failed: No token received.');
+                setApiError('ยืนยันตัวตนไม่สำเร็จ: ไม่ได้รับโทเคน');
             }
         } catch (error) {
             const message =
                 error instanceof AxiosError
                     ? (error.response?.data as { message?: string } | undefined)?.message || error.message
-                    : 'Login failed. Please check your credentials.';
+                    : 'เข้าสู่ระบบไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง';
 
             setApiError(message);
         } finally {
@@ -118,10 +117,34 @@ export default function LoginPage() {
                             </a>
                         </div>
 
-                        <Button type="submit" className="login-button" isLoading={isLoading} size="lg">
-                            เข้าสู่ระบบ
-                        </Button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary btn-lg login-button"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <div className="btn-loading">
+                                    <svg className="btn-spinner" viewBox="0 0 24 24">
+                                        <circle
+                                            className="spinner-bg"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            strokeWidth="3"
+                                            fill="none"
+                                        />
+                                        <path
+                                            className="spinner-fg"
+                                            d="M4 12a8 8 0 018-8"
+                                        />
+                                    </svg>
 
+                                    <span>...</span>
+                                </div>
+                            ) : (
+                                <span>เข้าสู่ระบบ</span>
+                            )}
+                        </button>
                     </form>
                 </Card>
 

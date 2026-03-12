@@ -18,7 +18,7 @@ export function FormInput<T extends FieldValues>({
   placeholder
 }: FormInputProps<T>) {
   const {
-    field,
+    field: { ref, ...field },
     fieldState: { error },
   } = useController({
     name,
@@ -28,6 +28,7 @@ export function FormInput<T extends FieldValues>({
   return (
     <Input
       {...field}
+      inputRef={ref}
       label={label}
       type={type}
       placeholder={placeholder}

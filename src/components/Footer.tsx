@@ -15,7 +15,6 @@ export const Footer: React.FC = () => {
                 หม่าล่าเชิงดอย
               </span>
             </Link>
-
             <p className="footer-description">
               สัมผัสรสชาติหมาล่าแท้ๆ พร้อมระบบสะสมแต้มที่คุ้มค่าที่สุดในย่านเชิงดอย
               มาร่วมเป็นส่วนหนึ่งของครอบครัวเราได้แล้ววันนี้
@@ -24,7 +23,6 @@ export const Footer: React.FC = () => {
 
           <div className="footer-section">
             <h4>สำรวจ</h4>
-
             <ul>
               <li><Link href="/">หน้าแรก</Link></li>
               <li><Link href="/bill">ออกบิลสะสมแต้ม</Link></li>
@@ -35,12 +33,10 @@ export const Footer: React.FC = () => {
           <div className="footer-section">
             <h4>ติดต่อเรา</h4>
             <ul>
-
               <li>
                 <span className="footer-label">Email Support</span>
                 <span>contact@malachengdoi.com</span>
               </li>
-
               <li>
                 <span className="footer-label">Location</span>
                 <span>เชิงดอย, เชียงใหม่, Thailand</span>
@@ -50,17 +46,12 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="footer-bottom">
-
           <p>© 2026 Mala Cheng Doi. All rights reserved.</p>
-
           <div>
             MADE FOR MALA LOVERS
           </div>
-
         </div>
-
       </div>
-
     </footer>
   );
 };

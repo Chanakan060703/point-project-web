@@ -8,7 +8,6 @@ import * as z from 'zod';
 import { useRouter } from 'next/navigation';
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card } from "@/components/Card";
-import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { createBill } from '@/lib/bill';
 import { getCurrentPoints } from '@/lib/auth';
@@ -16,7 +15,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import '../globals.css';
 
 const billSchema = z.object({
-    name: z.string().min(1, 'กรุณากรอกเชื่อบิล'),
+    name: z.string().min(1, 'กรุณากรอกชื่อบิล'),
     price: z.number().min(1, 'กรุณากรอกราคาอย่างน้อย 1 บาท'),
     redeemPoint: z.number().min(0),
 });
@@ -49,13 +48,21 @@ export default function BillPage() {
 
     const price = watch("price");
     const redeemPoint = watch("redeemPoint");
-
-
+    const nameField = register('name');
+    const priceField = register('price', {
+        valueAsNumber: true,
+        onChange: (e) => {
+            if (e.target.value.length > 8) {
+                e.target.value = e.target.value.slice(0, 8);
+                setValue('price', Number(e.target.value));
+            }
+        }
+    });
+    const redeemPointField = register('redeemPoint', { valueAsNumber: true });
 
     useEffect(() => {
         const fetchPoints = async () => {
             if (!user?.userId) return;
-
             try {
                 const points = await getCurrentPoints(user.userId);
                 setUserPoints(points);
@@ -74,97 +81,72 @@ export default function BillPage() {
     const finalAmount = Math.max(0, price - redeemPoint) || 0;
 
     const onSubmit = async (data: BillFormValues) => {
-
         if (!user?.userId) {
-            setError("User information missing");
+            setError("ไม่พบข้อมูลผู้ใช้");
             return;
         }
-
         setLoading(true);
         setError(null);
-
         try {
-
             await createBill({
                 userId: user.userId,
                 name: data.name,
                 price: data.price,
                 redeemPoint: data.redeemPoint
             });
-
             router.push("/");
             router.refresh();
-
         } catch (err) {
 
             const message =
                 err instanceof AxiosError
                     ? (err.response?.data as { message?: string })?.message || err.message
-                    : "Failed to create bill";
+                    : "สร้างบิลไม่สำเร็จ";
 
             setError(message);
-
         } finally {
             setLoading(false);
         }
-
     };
 
     return (
         <ProtectedRoute>
-
             <main className="bill-page">
-
                 <div className="bill-container">
-
                     <div className="bill-header">
                         <h2>สร้างบิล / สะสมแต้ม</h2>
                         <p>ทำรายการเพื่อเพิ่มแต้มสะสมของคุณ</p>
                     </div>
-
                     <Card className="bill-card">
                         <div className="bill-card-inner">
                             <div className="bill-section-header">
                                 <h3>ข้อมูลรายการ</h3>
                                 <p>กรุณากรอกรายละเอียดเพื่อคำนวณแต้ม</p>
                             </div>
-
                             <form onSubmit={handleSubmit(onSubmit)} className="bill-form">
-
                                 {error && (
                                     <div className="bill-error">
                                         {error}
                                     </div>
                                 )}
-
                                 <div className="bill-grid">
-
                                     <Input
                                         label="ชื่อรายการ / อาหาร"
-                                        placeholder="เช่น หมาล่าเผ็ดชา"
-                                        {...register('name')}
+                                        placeholder="เช่น หม่าล่าเผ็ดชา"
+                                        {...nameField}
+                                        inputRef={nameField.ref}
                                         error={errors.name?.message}
                                     />
-
                                     <Input
                                         label="ราคาตามบิล (บาท)"
                                         type="number"
                                         placeholder="0.00"
-                                        {...register('price', {
-                                            valueAsNumber: true,
-                                            onChange: (e) => {
-                                                if (e.target.value.length > 8) {
-                                                    e.target.value = e.target.value.slice(0, 8);
-                                                    setValue('price', Number(e.target.value));
-                                                }
-                                            }
-                                        })}
+                                        {...priceField}
+                                        inputRef={priceField.ref}
                                         error={errors.price?.message}
                                         max={isNaN(maxRedeemable) ? 0 : maxRedeemable}
                                     />
-
                                 </div>
-
                                 <div className="points-preview">
                                     <div className="points-preview-label">
                                         แต้มที่จะได้รับ (10%)
@@ -186,17 +168,18 @@ export default function BillPage() {
                                         <Input
                                             label=""
                                             type="number"
-                                            {...register('redeemPoint', { valueAsNumber: true })}
+                                            {...redeemPointField}
+                                            inputRef={redeemPointField.ref}
                                             error={errors.redeemPoint?.message}
                                             max={maxRedeemable}
                                         />
-                                        <Button
+                                        <button
                                             type="button"
-                                            variant="secondary"
                                             onClick={() => setValue('redeemPoint', isNaN(maxRedeemable) ? 0 : maxRedeemable)}
+                                            className="btn btn-secondary btn-md"
                                         >
                                             ใช้ทั้งหมด
-                                        </Button>
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="bill-summary">
@@ -204,50 +187,57 @@ export default function BillPage() {
                                         <span>ราคาปกติ</span>
                                         <span>{safePrice.toLocaleString()} ฿</span>
                                     </div>
-
                                     <div className="summary-row discount">
                                         <span>ส่วนลดจากแต้ม</span>
                                         <span>-{safeRedeemPoint.toLocaleString()} ฿</span>
                                     </div>
-
                                     <div className="summary-total">
                                         <span>ยอดชำระสุทธิ</span>
                                         <span>{finalAmount.toLocaleString()} ฿</span>
                                     </div>
-
                                 </div>
 
-                                <Button
+                                <button
                                     type="submit"
-                                    isLoading={loading}
-                                    size="lg"
-                                    fullWidth
+                                    disabled={loading}
+                                    className="btn btn-primary btn-lg btn-full"
                                 >
-                                    ยืนยันและชำระเงิน
-                                </Button>
+                                    {loading ? (
+                                        <div className="btn-loading">
+                                            <svg className="btn-spinner" viewBox="0 0 24 24">
+                                                <circle
+                                                    className="spinner-bg"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    strokeWidth="3"
+                                                    fill="none"
+                                                />
+                                                <path className="spinner-fg"
+                                                    d="M4 12a8 8 0 018-8"
+                                                />
+                                            </svg>
 
+                                            <span>...</span>
+                                        </div>
+                                    ) : (
+                                        <span>ยืนยันและชำระเงิน</span>
+                                    )}
+                                </button>
                             </form>
-
                         </div>
-
                     </Card>
 
                     <div className="bill-cancel">
-
-                        <Button
-                            variant="ghost"
-                            size="sm"
+                        <button
                             onClick={() => router.push("/")}
+                            className="btn btn-ghost btn-sm"
                         >
                             ยกเลิกและกลับหน้าหลัก
-                        </Button>
-
+                        </button>
                     </div>
-
                 </div>
-
             </main>
-
         </ProtectedRoute>
     );
 }
