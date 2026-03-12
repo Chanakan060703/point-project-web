@@ -110,7 +110,7 @@ export default function TransactionPage() {
                                                     : "transaction-point spend"
                                             }
                                         >
-                                            {tx.point.toLocaleString()}
+                                            {tx.point.toLocaleString()} แต้ม
                                         </div>
                                     </div>
                                 </Card>

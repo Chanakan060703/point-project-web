@@ -50,7 +50,7 @@ export default function Home() {
 
                   <Button
                     variant="ghost"
-                    onClick={handleLogout}
+                    onClick={() => handleLogout()}
                     size="sm"
                     className="logout-btn"
                   >

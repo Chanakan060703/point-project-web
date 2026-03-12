@@ -65,22 +65,23 @@ export const Header: React.FC = () => {
         </nav>
 
         <div className="header-right">
-          <>
-            <div className="points-box">
-              <span className="points-label">แต้มสะสม</span>
-              <span className="points-value">
-                {points !== null ? points.toLocaleString() : '...'} <span className="points-unit">แต้ม</span>
-              </span>
-            </div>
+          {user && (
+            <>
+              <div className="points-box">
+                <span className="points-label">แต้มสะสม</span>
+                <span className="points-value">
+                  {points !== null ? points.toLocaleString() : '...'} <span className="points-unit">แต้ม</span>
+                </span>
+              </div>
 
-            <button
-              onClick={handleLogout}
-              className="logout-btn"
-            >
-              ออกจากระบบ
-            </button>
-          </>
-
+              <button
+                onClick={() => handleLogout()}
+                className="logout-btn"
+              >
+                ออกจากระบบ
+              </button>
+            </>
+          )}
         </div>
 
       </div>
