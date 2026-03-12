@@ -9,11 +9,11 @@ interface FormSelectProps<T extends FieldValues> {
   options: { value: string; label: string }[];
 }
 
-export function FormSelect<T extends FieldValues>({ 
-  name, 
-  control, 
-  label, 
-  options 
+export function FormSelect<T extends FieldValues>({
+  name,
+  control,
+  label,
+  options
 }: FormSelectProps<T>) {
   const {
     field,

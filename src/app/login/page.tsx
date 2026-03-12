@@ -12,10 +12,11 @@ import { AxiosError } from 'axios';
 import { z } from 'zod';
 import { FormInput } from '@/components/FormInput';
 import { useAuthStore } from '@/store/useAuthStore';
+import '../globals.css';
 
 const loginSchema = z.object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    username: z.string().min(3, 'กรุณากรอก ชื่อผู้ใช้'),
+    password: z.string().min(6, 'กรุณากรอก รหัสผ่าน'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -26,10 +27,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { setUser, setToken } = useAuthStore();
 
-    const {
-        control,
-        handleSubmit,
-    } = useForm<LoginFormValues>({
+    const { control, handleSubmit } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
             username: '',
@@ -48,6 +46,7 @@ export default function LoginPage() {
             if (token) {
                 setToken(token);
                 const profile = await getProfile();
+
                 setUser({
                     userId: profile.userId,
                     username: profile.username,
@@ -72,27 +71,19 @@ export default function LoginPage() {
     };
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/30 dark:from-gray-950 dark:via-indigo-950/20 dark:to-purple-950/20 overflow-hidden flex items-center justify-center p-4">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-2xl animate-pulse" />
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-pink-400/10 to-rose-400/10 rounded-full blur-2xl animate-pulse delay-1000" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-300/5 to-purple-300/5 rounded-full blur-2xl" />
-            </div>
+        <main className="login-page">
+            <div className="login-container">
 
-            <div className="relative w-full max-w-md space-y-8 animate-[fadeInUp_0.7s_ease-out]">
-                <div className="text-center space-y-2">
-                    <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
-                        Welcome Back
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">
-                        Please enter your details to sign in
-                    </p>
+                <div className="login-header">
+                    <h1>ยินดีต้อนรับ</h1>
+                    <p>กรุณาเข้าสู่ระบบ</p>
                 </div>
 
-                <Card gradient className="borderGlow">
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <Card>
+                    <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+
                         {apiError && (
-                            <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm">
+                            <div className="login-error">
                                 {apiError}
                             </div>
                         )}
@@ -100,48 +91,44 @@ export default function LoginPage() {
                         <FormInput
                             name="username"
                             control={control}
-                            label="Username"
-                            placeholder="username"
+                            label="ชื่อผู้ใช้"
+                            placeholder="ชื่อผู้ใช้"
                         />
 
                         <FormInput
                             name="password"
                             control={control}
-                            label="Password"
+                            label="รหัสผ่าน"
                             type="password"
                             placeholder="••••••••"
                         />
 
-                        <div className="flex items-center justify-between text-sm">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span className="text-gray-600 dark:text-gray-400">Remember me</span>
+                        <div className="login-options">
+                            <label className="remember">
+                                <input type="checkbox" />
+                                <span>จดจำฉัน</span>
                             </label>
-                            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                Forgot password?
+
+                            <a href="#" className="forgot">
+                                ลืมรหัสผ่าน?
                             </a>
                         </div>
 
-                        <Button type="submit" className="w-full shadow-lg" isLoading={isLoading} size="lg">
-                            Sign In
+                        <Button type="submit" className="login-button" isLoading={isLoading} size="lg">
+                            เข้าสู่ระบบ
                         </Button>
+
                     </form>
                 </Card>
 
-                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p className="login-register">
                     {`Don't have an account? `}
-                    <Link href="/register" className="font-bold text-indigo-600 hover:text-indigo-500 transition-colors">
-                        Create an account
+                    <Link href="/register">
+                        สร้างบัญชี
                     </Link>
                 </p>
-            </div>
 
-            <style jsx global>{`
-                @keyframes fadeInUp {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `}</style>
+            </div>
         </main>
     );
 }
