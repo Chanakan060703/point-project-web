@@ -979,9 +979,9 @@ body {
 }
 
 .btn-secondary {
-  margin-top: 5px;
+  margin-top: 6px;
   height: 45px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   background: #e5e7eb;
   color: #111827;
@@ -1302,10 +1302,6 @@ body {
 .footer-section a {
   text-decoration: none;
   color: inherit;
-}
-
-.footer-section a:hover {
-  color: #2563eb;
 }
 
 /* contact label */

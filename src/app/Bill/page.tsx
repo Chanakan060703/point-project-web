@@ -16,8 +16,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import '../globals.css';
 
 const billSchema = z.object({
-    name: z.string().min(1, 'Please enter a bill name'),
-    price: z.number().min(1, 'Price must be at least 1'),
+    name: z.string().min(1, 'กรุณากรอกเชื่อบิล'),
+    price: z.number().min(1, 'กรุณากรอกราคาอย่างน้อย 1 บาท'),
     redeemPoint: z.number().min(0),
 });
 
@@ -50,6 +50,8 @@ export default function BillPage() {
     const price = watch("price");
     const redeemPoint = watch("redeemPoint");
 
+
+
     useEffect(() => {
         const fetchPoints = async () => {
             if (!user?.userId) return;
@@ -65,9 +67,11 @@ export default function BillPage() {
         fetchPoints();
     }, [user]);
 
-    const pointsToEarn = Math.floor(price * 0.1);
-    const maxRedeemable = Math.min(userPoints, Math.floor(price));
-    const finalAmount = Math.max(0, price - redeemPoint);
+    const safePrice = Number(watch("price")) || 0;
+    const safeRedeemPoint = Number(watch("redeemPoint")) || 0;
+    const pointsToEarn = Math.floor(price * 0.1) || 0;
+    const maxRedeemable = Math.min(userPoints, Math.floor(price || 0)) || 0;
+    const finalAmount = Math.max(0, price - redeemPoint) || 0;
 
     const onSubmit = async (data: BillFormValues) => {
 
@@ -156,6 +160,7 @@ export default function BillPage() {
                                             }
                                         })}
                                         error={errors.price?.message}
+                                        max={isNaN(maxRedeemable) ? 0 : maxRedeemable}
                                     />
 
                                 </div>
@@ -185,29 +190,24 @@ export default function BillPage() {
                                             error={errors.redeemPoint?.message}
                                             max={maxRedeemable}
                                         />
-
                                         <Button
                                             type="button"
                                             variant="secondary"
-                                            onClick={() => setValue('redeemPoint', maxRedeemable)}
+                                            onClick={() => setValue('redeemPoint', isNaN(maxRedeemable) ? 0 : maxRedeemable)}
                                         >
-                                            Max
+                                            ใช้ทั้งหมด
                                         </Button>
-
                                     </div>
-
                                 </div>
-
                                 <div className="bill-summary">
-
                                     <div className="summary-row">
                                         <span>ราคาปกติ</span>
-                                        <span>{price.toLocaleString()} ฿</span>
+                                        <span>{safePrice.toLocaleString()} ฿</span>
                                     </div>
 
                                     <div className="summary-row discount">
                                         <span>ส่วนลดจากแต้ม</span>
-                                        <span>-{redeemPoint.toLocaleString()} ฿</span>
+                                        <span>-{safeRedeemPoint.toLocaleString()} ฿</span>
                                     </div>
 
                                     <div className="summary-total">
