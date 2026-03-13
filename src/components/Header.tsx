@@ -49,7 +49,7 @@ export const Header: React.FC = () => {
       <div className="header-container">
 
         <Link href="/" className="logo">
-          หม่าล่าเชียงดอย
+          หม่าล่าเชิงดอย
         </Link>
 
         <nav className="nav">

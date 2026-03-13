@@ -16,10 +16,10 @@ import { useAuthStore } from '@/store/useAuthStore';
 import '../../globals.css';
 
 const registerSchema = z.object({
-    name: z.string().min(2, 'กรุณากรอกชื่อ-นามสกุล'),
-    username: z.string().min(3, 'กรุณากรอกชื่อผู้ใช้'),
-    password: z.string().min(6, 'กรุณากรอกรหัสผ่าน'),
-    confirmPassword: z.string().min(6, 'กรุณากรอกยืนยันรหัสผ่าน'),
+    name: z.string().min(2, 'กรุณากรอกชื่อ-นามสกุล ไม่ต่ำกว่า 2 ตัวอักษร').max(50, 'กรุณากรอกชื่อ-นามสกุลไม่เกิน 50 ตัวอักษร'),
+    username: z.string().min(3, 'กรุณากรอกชื่อผู้ใช้ ไม่ต่ำกว่า 3 ตัวอักษร').max(20, 'กรุณากรอกชื่อผู้ใช้ไม่เกิน 20 ตัวอักษร'),
+    password: z.string().min(6, 'กรุณากรอกรหัสผ่าน ไม่ต่ำกว่า 6 ตัวอักษร').max(20, 'กรุณากรอกรหัสผ่านไม่เกิน 20 ตัวอักษร'),
+    confirmPassword: z.string().min(6, 'กรุณากรอกยืนยันรหัสผ่าน ไม่ต่ำกว่า 6 ตัวอักษร').max(20, 'กรุณากรอกยืนยันรหัสผ่านไม่เกิน 20 ตัวอักษร'),
     age: z
         .string()
         .min(1, 'กรุณากรอกอายุ')
@@ -38,6 +38,7 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const { setUser, setToken } = useAuthStore();
+    const [error, setError] = useState('');
 
     const { control, handleSubmit } = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
@@ -87,6 +88,7 @@ export default function RegisterPage() {
                 error instanceof AxiosError
                     ? (error.response?.data as { message?: string } | undefined)?.message || error.message
                     : 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
+            setError(errorMessage);
             toast.error(errorMessage);
         } finally {
             setIsLoading(false);
@@ -176,7 +178,7 @@ export default function RegisterPage() {
 
                 <p className="register-login">
                     มีบัญชีผู้ใช้อยู่แล้ว?{' '}
-                    <Link href="/login">เข้าสู่ระบบ</Link>
+                    <Link href="/auth/login">เข้าสู่ระบบ</Link>
                 </p>
 
             </div>

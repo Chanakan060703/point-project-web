@@ -1,5 +1,6 @@
 import api from './axios';
 import Cookies from 'js-cookie';
+import { unwrapOne } from './response';
 
 export interface AuthUser {
   userId: number;
@@ -11,7 +12,13 @@ export interface AuthUser {
 export interface AuthResponse {
   access_token?: string;
   token?: string;
-  user: AuthUser;
+  user?: AuthUser | number;
+}
+
+interface ApiEnvelope<T> {
+  status: boolean;
+  message: string;
+  data: T;
 }
 
 export interface UserProfile {
@@ -37,11 +44,13 @@ export const login = async (
   username: string,
   password: string
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', {
+  const response = await api.post<ApiEnvelope<AuthResponse>>('/auth/login', {
     username,
     password
   });
-  const token = response.data.access_token || response.data.token;
+  const raw = response.data?.data ?? response.data;
+  const payload = raw ? unwrapOne(raw as AuthResponse | AuthResponse[]) : undefined;
+  const token = payload?.access_token || payload?.token;
 
   if (token) {
     Cookies.set('token', token, {
@@ -50,7 +59,7 @@ export const login = async (
     });
   }
 
-  return response.data;
+  return payload ?? {};
 };
 
 export const register = async (
@@ -60,14 +69,16 @@ export const register = async (
   age: number,
   gender: string
 ): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/register', {
+  const response = await api.post<ApiEnvelope<AuthResponse>>('/auth/register', {
     name,
     username,
     password,
     age,
     gender
   });
-  const token = response.data.access_token || response.data.token;
+  const raw = response.data?.data ?? response.data;
+  const payload = raw ? unwrapOne(raw as AuthResponse | AuthResponse[]) : undefined;
+  const token = payload?.access_token || payload?.token;
 
   if (token) {
     Cookies.set('token', token, {
@@ -76,13 +87,13 @@ export const register = async (
     });
   }
 
-  return response.data;
+  return payload ?? {};
 };
 
 
 export const getProfile = async (): Promise<UserProfile> => {
-  const response = await api.get<UserProfile>('/auth/profile');
-  return response.data;
+  const response = await api.get<UserProfile | UserProfile[]>('/auth/profile');
+  return unwrapOne(response.data);
 };
 
 export const logout = () => {
@@ -94,6 +105,6 @@ export const getSession = () => {
 };
 
 export const getCurrentPoints = async (id: number): Promise<number> => {
-  const response = await api.get<{ pointTotal: number }>(`/user/${id}/points`);
-  return response.data.pointTotal;
+  const response = await api.get<{ pointTotal: number } | { pointTotal: number }[]>(`/user/${id}/points`);
+  return unwrapOne(response.data).pointTotal;
 };

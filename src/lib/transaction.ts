@@ -1,4 +1,5 @@
 import api from './axios';
+import { unwrapOne } from './response';
 
 export type TransactionType = 'EARN' | 'REDEEM';
 export type TransactionStatus = 'PENDING' | 'SUCCESS' | 'FAILED';
@@ -37,21 +38,21 @@ export const getTransactions = async (): Promise<Transaction[]> => {
 };
 
 export const getTransactionById = async (id: number): Promise<Transaction> => {
-  const response = await api.get<Transaction>(`/transaction/${id}`);
-  return response.data;
+  const response = await api.get<Transaction | Transaction[]>(`/transaction/${id}`);
+  return unwrapOne(response.data);
 };
 
 export const createTransaction = async (data: CreateTransactionRequest): Promise<Transaction> => {
-  const response = await api.post<Transaction>('/transaction', data);
-  return response.data;
+  const response = await api.post<Transaction | Transaction[]>('/transaction', data);
+  return unwrapOne(response.data);
 };
 
 export const updateTransaction = async (id: number, data: Partial<CreateTransactionRequest>): Promise<Transaction> => {
-  const response = await api.patch<Transaction>(`/transaction/${id}`, data);
-  return response.data;
+  const response = await api.patch<Transaction | Transaction[]>(`/transaction/${id}`, data);
+  return unwrapOne(response.data);
 };
 
 export const deleteTransaction = async (id: number): Promise<Transaction> => {
-  const response = await api.delete<Transaction>(`/transaction/${id}`);
-  return response.data;
+  const response = await api.delete<Transaction | Transaction[]>(`/transaction/${id}`);
+  return unwrapOne(response.data);
 };

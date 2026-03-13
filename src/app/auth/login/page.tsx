@@ -14,8 +14,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import '../../globals.css';
 
 const loginSchema = z.object({
-    username: z.string().min(3, 'กรุณากรอกชื่อผู้ใช้'),
-    password: z.string().min(6, 'กรุณากรอกรหัสผ่าน'),
+    username: z.string().min(3, 'กรุณากรอกชื่อผู้ใช้ ไม่ต่ำกว่า 3 ตัวอักษร').max(20, 'กรุณากรอกชื่อผู้ใช้ไม่เกิน 20 ตัวอักษร'),
+    password: z.string().min(6, 'กรุณากรอกรหัสผ่าน ไม่ต่ำกว่า 6 ตัวอักษร').max(20, 'กรุณากรอกรหัสผ่านไม่เกิน 20 ตัวอักษร'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -150,7 +150,7 @@ export default function LoginPage() {
 
                 <p className="login-register">
                     {`Don't have an account? `}
-                    <Link href="/register">
+                    <Link href="/auth/register">
                         สร้างบัญชี
                     </Link>
                 </p>

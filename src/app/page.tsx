@@ -24,7 +24,7 @@ export default function Home() {
         <Card className="home-card">
           <div className="home-content">
             <h1 className="home-title">
-              หม่าล่าเชียงดอย
+              หม่าล่าเชิงดอย
             </h1>
             <div className="home-actions">
               {isAuthenticated ? (

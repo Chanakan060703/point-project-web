@@ -29,7 +29,25 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const payload = response.data as unknown as {
+      status?: boolean;
+      message?: string;
+      data?: unknown;
+    };
+
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      'data' in payload &&
+      'status' in payload &&
+      'message' in payload
+    ) {
+      response.data = payload.data;
+    }
+
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       console.error('[API Error] 401 Unauthorized - Token might be invalid or expired', {
